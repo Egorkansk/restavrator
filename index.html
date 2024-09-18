@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Мастер реставрации фотографий</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 20px;
+        }
+        .gallery {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-around;
+        }
+        .photo {
+            position: relative;
+            margin: 10px;
+            cursor: pointer;
+        }
+        .photo img {
+            width: 300px;
+            height: auto;
+            border: 2px solid #ccc;
+            border-radius: 5px;
+            transition: opacity 0.3s ease;
+        }
+        .after {
+            position: absolute;
+            top: 0;
+            left: 0;
+            opacity: 0;
+        }
+          .fixed-button {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            padding: 30px 20px;
+            background-color: #007BFF;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        .form-popup {
+            display: none;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            padding: 20px;
+            background-color: white;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+        }
+        .form-popup input[type="text"],
+        .form-popup input[type="email"],
+        .form-popup input[type="file"] {
+            display: block;
+            margin-bottom: 10px;
+            width: 100%;
+        }
+        .close-button {
+            background-color: red;
+            color: white;
+            border: none;
+            padding: 5px 10px;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+
+<h1>Галерея Моих работ (результат загружается при нажатии)</h1>
+<div class="gallery" id="gallery"></div>
+<button class="fixed-button" onclick="openForm()">Отправить фото в работу</button>
+
+<div class="form-popup" id="formPopup">
+    <button class="close-button" onclick="closeForm()">Закрыть</button>
+    <h2>Добавить фото</h2>    
+    <form id="uploadForm" enctype="multipart/form-data" method="POST" action="upload.php">
+        <textarea type="text" name="info" rows="5" cols="33"
+             value="cjcmv"
+            placeholder="Введите информацию" ></textarea></textarea>
+        <input type="email" name="email"
+        value="gkgjg@jfjfj.ru"
+        placeholder="Введите ваш email" required>
+        <input type="file" name="photo" accept="image/*" required>
+        <button type="submit">Отправить</button>
+    </form>
+</div>
+
+
+    
+<script src="https://unpkg.com/@vkontakte/vk-bridge/dist/browser.min.js"></script>
+
+<script>
+    const galleryElement = document.getElementById('gallery');
+    
+    for (let i = 1; i <= 2; i++) {
+        const photoDiv = document.createElement('div');
+        photoDiv.className = 'photo';
+        photoDiv.setAttribute('onclick', 'toggleImage(this)');
+
+        const beforeImage = document.createElement('img');
+        beforeImage.src = 'works/before'+i+'.jpg';
+        beforeImage.alt = 'До';
+        beforeImage.className = 'before';
+
+        const afterImage = document.createElement('img');
+        afterImage.src = 'works/after'+i+'.jpg';
+        afterImage.alt = 'После';
+        afterImage.className = 'after';
+
+        photoDiv.appendChild(beforeImage);
+        photoDiv.appendChild(afterImage);
+        galleryElement.appendChild(photoDiv);
+    }
+
+for (let i = 1; i <= 20; i++) {
+        photoDiv = document.createElement('div');
+        photoDiv.className = 'photo';
+        photoDiv.setAttribute('onclick', 'toggleImage(this)');
+
+        const beforeImage = document.createElement('img');
+        beforeImage.src = 'works/PHOTO ('+((i*2)+1)+').jpg';
+        beforeImage.alt = 'До';
+        beforeImage.className = 'before';
+
+        const afterImage = document.createElement('img');
+        afterImage.src = 'works/PHOTO ('+((i*2)+2)+').jpg';
+        afterImage.alt = 'После';
+        afterImage.className = 'after';
+
+        photoDiv.appendChild(beforeImage);
+        photoDiv.appendChild(afterImage);
+        galleryElement.appendChild(photoDiv);
+    }
+
+vkinit()
+
+
+async function vkinit(){
+    vkBridge.send('VKWebAppInit')
+  .then((data) => { 
+    if (data.result) {
+      alert('ok')
+    } else {
+      // Ошибка
+    }
+  })
+  .catch((error) => {
+    
+    alert(error);
+  });
+    
+}
+    function toggleImage(element) {
+        const beforeImage = element.querySelector('.before');
+        const afterImage = element.querySelector('.after');
+        
+        if (afterImage.style.opacity === '0') {
+            beforeImage.style.opacity = '0';
+            afterImage.style.opacity = '1';
+        } else {
+            beforeImage.style.opacity = '1';
+            afterImage.style.opacity = '0';
+        }
+    }
+    function openForm() {        document.getElementById('formPopup').style.display = 'block';
+    }
+
+    function closeForm() {
+        document.getElementById('formPopup').style.display = 'none';
+    }
+
+    
+document.getElementById('uploadForm').addEventListener('submit', function(event) {
+    event.preventDefault();
+    const files = document.querySelector('[type=file]').files;
+const opis = document.querySelector('[type=text]');
+const email = document.querySelector('[type=email]');
+
+alert("nov2")
+
+    if (files.length > 0) {
+        const formData = new FormData();
+        formData.append('email', email.value); //
+        formData.append('opisanie', opis.value); //
+        formData.append('file', files[0]); // Добавляем файл в FormData
+
+        // Отправка данных на сервер
+        fetch('process.php', { // Укажите правильный URL для загрузки
+            method: 'POST',
+            body: formData
+        })
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Network response was not ok');
+            }
+            
+            
+            return response.text(); // Или response.text() в зависимости от ответа сервера
+        })
+        .then(data => {
+            alert('Success:'+ data);
+            closeForm(); // Закрываем форму после успешной загрузки
+        })
+        .catch((error) => {
+            alert('Error:'+error);
+        });
+    } else {
+        console.error('No file selected');
+    }
+});
+</script>
+
+</body>
+</html>
